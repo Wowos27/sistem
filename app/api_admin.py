@@ -989,7 +989,7 @@ def adminwilayahhapus():
 @app.route('/admin/monografi')
 def adminmono():
     info_mono=fetch_data_and_format("SELECT * FROM monografi")
-    return render_template("admin/monografi.html", info_mono = info_mono,fields_mono=fields_mono)
+    return render_template("admin/monografi.html", info_mono = info_mono)
 
 @app.route('/admin/tambah_mono', methods=['POST'])
 @jwt_required()

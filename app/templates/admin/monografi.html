@@ -316,9 +316,33 @@
                     <div class="col-lg-6">
                       <label for="categoryDropdown">Pilih Kategori:</label>
                       <select id="categoryDropdownmono" style="min-width: 150px;" class="form-control" multiple>
-                        {% for field in fields_mono %}
-                        <option value="{{ field.value }}">{{ field.name }}</option>
-                        {% endfor %}
+                          <option value="jpenduduk">Jumlah Penduduk</option>
+						  <option value="laki">laki-laki</option>
+						  <option value="perempuan">Perempuan</option>
+						  <option value="jkkprese">Jumlah KK Presejahtera</option>
+						  <option value="jkkseja">Jumlah KK Sejahtera</option>
+						  <option value="jkkkaya">Jumlah KK Kaya</option>
+						  <option value="jkksedang">Jumlah KK Sedang</option>
+						  <option value="jkkmiskin">Jumlah KK Miskin</option>
+						  <option value="buruh">Buruh</option>
+						  <option value="petani">Petani</option>
+						  <option value="peternak">Peternak</option>
+						  <option value="pedagang">Pedagang</option>
+						  <option value="tukangkayu">Tukang Kayu</option>
+						  <option value="tukangbatu">Tukang Batu</option>
+						  <option value="penjahit">Penjahit</option>
+						  <option value="asn">ASN</option>
+						  <option value="pensiunan">Pensiunan</option>
+						  <option value="perangkatdesa">Perangkat Desa</option>
+						  <option value="jasa_wiraswasta">Jasa Wiraswasta</option>
+						  <option value="pengrajinbatik">Pengrajin Batik</option>
+						  <option value="dll">DLL</option>
+						  <option value="islam">Islam</option>
+						  <option value="kristen">Kristen</option>
+						  <option value="protestan">Protestan</option>
+						  <option value="katolik">Katolik</option>
+						  <option value="hindu">Hindu</option>
+						  <option value="budha">Budha</option>
                       </select>
                     </div>
                     <div class="col-lg-6">
@@ -347,185 +371,184 @@
 {% endblock %}
 {% block js%}
 <script>
-  var fields_mono = ['Jumalah Penduduk', 'Jumlah Kepala Keluarga', 'laki-laki', 'Perempuan', 'Jumlah KK Presejahtera', 'Jumlah KK Sejahtera', 'Jumlah KK Kaya',
-    'Jumlah KK Sedang', 'Jumlah KK Miskin','Buruh', 'Petani', 'Peternak', 'Pedagang', 'Tukang Kayu', 'Tukang Batu', 'Penjahit', 'ASN',
-    'Pensiunan', 'Perangkat Desa', 'Jasa Wiraswasta',
-    'Pengrajin Batik', 'DLL', 'Islam', 'Kristen', 'Protestan', 'Katolik', 'Hindu', 'Budha'
-  ];
+var data = JSON.parse('{{info_mono|tojson}}');
 
-  // Parsing JSON
-  var data_mono = JSON.parse('{{info_mono|tojson}}');
-  console.log(data_mono);
+// label yg akan ditampilkan di grafik
+var fields_mono = [
+  'Jumlah Penduduk', 'Jumlah Kepala Keluarga', 
+  'laki-laki', 'Perempuan', 
+  'Jumlah KK Presejahtera', 'Jumlah KK Sejahtera', 
+  'Jumlah KK Kaya', 'Jumlah KK Sedang', 'Jumlah KK Miskin',
+  'Buruh', 'Petani', 'Peternak', 'Pedagang', 
+  'Tukang Kayu', 'Tukang Batu', 'Penjahit', 
+  'ASN', 'Pensiunan', 'Perangkat Desa', 
+  'Jasa Wiraswasta', 'Pengrajin Batik', 'DLL', 
+  'Islam', 'Kristen', 'Protestan', 'Katolik', 'Hindu', 'Budha'
+];
 
-  // Memisahkan data_mono berdasarkan tahun
-  var dataByYear_mono = data_mono.reduce(function (acc, item) {
-    if (!acc[item.tahun]) {
-      acc[item.tahun] = {};
-    }
-    $.each(fields_mono, function (index, field) {
-      if (!acc[item.tahun][field]) {
-        acc[item.tahun][field] = [];
-      }
-      acc[item.tahun][field].push(item[field]);
+// mapping data
+const mapping = {
+  "jpenduduk": "Jumlah Penduduk",
+  "laki": "laki-laki",
+  "perempuan": "Perempuan",
+  "jkkprese": "Jumlah KK Presejahtera",
+  "jkkseja": "Jumlah KK Sejahtera",
+  "jkkkaya": "Jumlah KK Kaya",
+  "jkksedang": "Jumlah KK Sedang",
+  "jkkmiskin": "Jumlah KK Miskin",
+  "buruh": "Buruh",
+  "petani": "Petani",
+  "peternak": "Peternak",
+  "pedagang": "Pedagang",
+  "tukangkayu": "Tukang Kayu",
+  "tukangbatu": "Tukang Batu",
+  "penjahit": "Penjahit",
+  "asn": "ASN",
+  "pensiunan": "Pensiunan",
+  "perangkatdesa": "Perangkat Desa",
+  "jasa_wiraswasta": "Jasa Wiraswasta",
+  "pengrajinbatik": "Pengrajin Batik",
+  "dll": "DLL",
+  "islam": "Islam",
+  "kristen": "Kristen",
+  "protestan": "Protestan",
+  "katolik": "Katolik",
+  "hindu": "Hindu",
+  "budha": "Budha"
+};
+
+// Mengambil tahun dari data
+var tahun = data.map(item => item.tahun);
+
+// Mengambil data untuk grafik
+var seriesData_mono = [];
+fields_mono.forEach(field => {
+  var key = Object.keys(mapping).find(k => mapping[k] === field);
+  var dataField = data.map(item => item[key]);
+  seriesData_mono.push({
+    name: field,
+    data: dataField
+  });
+});
+
+// Membuat opsi grafik
+var options_mono = {
+  series: seriesData_mono,
+  chart: {
+    type: "bar",
+    height: 260,
+    toolbar: {
+      show: false,
+    },
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: "42%",
+      endingShape: "rounded",
+      borderRadius: 5,
+    },
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  xaxis: {
+    categories: tahun,
+  },
+  yaxis: {
+    show: true,
+  },
+  stroke: {
+    show: true,
+    width: 5,
+    colors: ["transparent"],
+  },
+  tooltip: {
+    theme: "dark",
+  },
+};
+
+// Membuat dan merender grafik
+var chart_mono = new ApexCharts($("#chart_mono")[0], options_mono);
+chart_mono.render();
+var dataByYear_mono = {};
+data.forEach(item => {
+  if (!dataByYear_mono[item.tahun]) {
+    dataByYear_mono[item.tahun] = {};
+  }
+  Object.keys(mapping).forEach(key => {
+    dataByYear_mono[item.tahun][key] = item[key];
+  });
+});
+
+// Fungsi untuk mengambil nilai yang dipilih dari dropdown
+function getSelectedValues(selectElement) {
+  var selected = [];
+  $(selectElement).find('option:selected').each(function () {
+    selected.push($(this).val());
+  });
+  return selected;
+}
+
+// Fungsi untuk memperbarui grafik
+function updateChart() {
+  var yearDropdown = $("#yearDropdownmono");
+  var categoryDropdown = $("#categoryDropdownmono");
+  var selectedYears = getSelectedValues(yearDropdown);
+  var selectedCategories = getSelectedValues(categoryDropdown);
+  var newSeriesData = [];
+  selectedYears.forEach(year => {
+    var seriesData = [];
+    selectedCategories.forEach(category => {
+      seriesData.push(dataByYear_mono[year][category] || 0);
     });
-    return acc;
-  }, {});
-
-  // Mengambil kategori dari fields_mono
-  var categories_mono = fields_mono;
-
-  // Menyiapkan data untuk grafik
-  var seriesData_mono = [];
-  $.each(Object.keys(dataByYear_mono), function (index, year) {
-    seriesData_mono.push({
+    newSeriesData.push({
       name: year,
-      data: $.map(fields_mono, function (field) {
-        return dataByYear_mono[year][field] ? dataByYear_mono[year][field][0] :
-        0; // Ambil nilai pertama dari array data
-      }),
+      data: seriesData
     });
   });
-
-  // Membuat opsi grafik
-  var options_mono = {
-    series: seriesData_mono,
-    chart: {
-      type: "bar",
-      height: 260,
-      toolbar: {
-        show: false,
-      },
-    },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: "42%",
-        endingShape: "rounded",
-        borderRadius: 5,
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
+  chart_mono.updateOptions({
+    series: newSeriesData,
     xaxis: {
-      categories: categories_mono,
-    },
-    yaxis: {
-      show: true,
-    },
-    stroke: {
-      show: true,
-      width: 5,
-      colors: ["transparent"],
-    },
-    tooltip: {
-      theme: "dark",
-    },
-  };
-
-  // Membuat dan merender grafik
-  var chart_mono = new ApexCharts($("#chart_mono")[0], options_mono);
-  chart_mono.render();
-
-  function getSelectedValues(selectElement) {
-    var selected = [];
-    $(selectElement).find('option:selected').each(function () {
-      selected.push($(this).val());
-    });
-    return selected;
-  }
-
-  function updateChart() {
-    var yearDropdown = $("#yearDropdownmono");
-    var categoryDropdown = $("#categoryDropdownmono");
-    var selectedYears = getSelectedValues(yearDropdown);
-    console.log(selectedYears);
-    var selectedCategories = getSelectedValues(categoryDropdown);
-    console.log(selectedCategories);
-
-    var newSeriesData = [];
-    var newSeriesData = [];
-    $.each(selectedYears, function (index, year) {
-      var seriesData = [];
-      $.each(selectedCategories, function (index, category) {
-        if (dataByYear_mono[year] && dataByYear_mono[year][category]) {
-          seriesData.push(dataByYear_mono[year][category][0]); // Mengambil data untuk kategori dan tahun
-        } else {
-          seriesData.push(0);
-        }
-      });
-      newSeriesData.push({
-        name: year,
-        data: seriesData
-      });
-    });
-
-    chart_mono.updateOptions({
-      series: newSeriesData,
-      xaxis: {
-        categories: selectedCategories.length > 0 ? selectedCategories : categories_mono
-      }
-    });
-
-  }
-
-  $("#yearDropdownmono").on('change', function () {
-    updateChart();
-  });
-  $("#categoryDropdownmono").on('change', function () {
-    updateChart();
-  });
-
-  $(document).ready(function () {
-
-    var cb = $('#tahun').prop('selected');
-    console.log(cb)
-    var fields = ['id', 'jpenduduk', 'jkk', 'laki', 'perempuan', 'jkkprese', 'jkkseja', 'jkkkaya',
-      'jkksedang', 'jkkmiskin', 'buruh', 'petani', 'peternak', 'pedagang', 'tukangkayu', 'tukangbatu', 'penjahit', 'asn',
-      'pensiunan', 'perangkatdesa', 'jasa_wiraswasta',
-      'pengrajinbatik', 'dll', 'islam', 'kristen', 'protestan', 'katolik', 'hindu', 'budha'
-    ];
-
-    function change() {
-      var info_mono = JSON.parse('{{info_mono|tojson}}');
-      console.log(info_mono);
-      let found = 0
-      for (const info of info_mono) {
-        var value = $('#tahun').val()
-        if (info.tahun == value) {
-          fields.forEach(field => {
-            $(`[name=${field}]`).val(info[field]);
-          });
-          found = 1
-        }
-        $(`[name='submit']`).html("save edit");
-        $(`[name='submit']`).val("edit");
-      }
-      if (found == 0) {
-        fields.forEach(field => {
-          $(`[name=${field}]`).val("");
-        });
-        $(`[name='submit']`).html("save tambah");
-        $(`[name='submit']`).val("tambah");
-      }
+      categories: selectedCategories.length > 0 ? selectedCategories : Object.keys(mapping)
     }
-    change()
-    $('#tahun').on('change', function () {
-      change();
-    });
+  });
+}
 
-    function sort_tahun() {
-      var selectElement = document.getElementById('tahun');
-      var optionsArray = Array.from(selectElement.options);
-      optionsArray.sort(function (a, b) {
-        return a.value - b.value;
-      });
-      selectElement.innerHTML = '';
-      optionsArray.forEach(function (option) {
-        selectElement.appendChild(option);
-      });
-      change();
-    }
+// Event listener untuk dropdown
+$("#yearDropdownmono").on('change', function () {
+  updateChart();
+});
+
+$("#categoryDropdownmono").on('change', function () {
+  updateChart();
+});
+
+// Fungsi untuk menghandle perubahan tahun
+function change() {
+  var value = $('#tahun').val();
+  data.forEach(field => {
+    $(`[name=${field}]`).val(data.find(item => item.tahun == value)[field]);
+  });
+}
+
+// Event listener untuk dropdown tahun
+$('#tahun').on('change', function () {
+  change();
+});
+// Fungsi untuk mengurutkan tahun
+function sort_tahun() {
+  var selectElement = document.getElementById('tahun');
+  var optionsArray = Array.from(selectElement.options);
+  optionsArray.sort(function (a, b) {
+    return a.value - b.value;
+  });
+  selectElement.innerHTML = '';
+  optionsArray.forEach(function (option) {
+    selectElement.appendChild(option);
+  });
+  change();
+}
     $('#tambah_tahun').on('click', function () {
       var selectElement = document.getElementById('tahun');
       var Option = document.createElement('option');
@@ -583,7 +606,6 @@
         alert("error");
       }
     });
-  });
 </script>
 <script>
   function hapusMono() {
