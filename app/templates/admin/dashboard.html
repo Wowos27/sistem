@@ -5,10 +5,6 @@
     overflow-x: auto; /* Menambahkan scroll horizontal jika diperlukan */
   }
   
-  #sales-overview {
-    max-width: 100%; /* Membatasi lebar maksimum sesuai dengan ukuran container */
-    height: 300px; /* Sesuaikan tinggi grafik sesuai kebutuhan */
-  }
 </style>
 </head>
 <div class="page-titles">
@@ -126,32 +122,6 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-6">
-        <div class="card w-100">
-          <div class="card-body">
-            <div class="d-md-flex align-items-center">
-              <div>
-                <h3 class="card-title">Sales Overview</h3>
-                <h6 class="card-subtitle">Ample admin Vs Pixel admin</h6>
-              </div>
-              <div class="ms-auto">
-                <ul class="list-style-none">
-                  <li class="list-inline-item text-primary">
-                    <i
-                      class="ri-checkbox-blank-circle-fill fs-1 me-1"
-                    ></i>
-                    Ample
-                  </li>
-                  <li class="list-inline-item text-info">
-                    <i class="ri-checkbox-blank-circle-fill fs-1 me-1"></i
-                    >Pixel Admin
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div id="sales-overview3" class="mt-4"></div>
-          </div>
-        </div>
       </div>
     {% endblock %}
 
@@ -196,9 +166,10 @@
         return colors;
     }
 
-    var fields_mono = ['jpenduduk', 'jkk', 'laki', 'perempuan', 'jkkprese', 'jkkseja', 'jkkkaya',
-        'jkksedang', 'jkkmiskin', 'petani', 'peternak', 'pedagang', 'tukangkayu', 'tukangbatu', 'penjahit', 'asn', 'pensiunan', 'perangkatdesa', 'jasa_wiraswasta',
-        'pengrajinbatik', 'dll', 'islam', 'kristen', 'protestan', 'katolik', 'hindu', 'budha'];
+    var fields_mono = ['Jumalah Penduduk', 'Jumlah Kepala Keluarga', 'laki-laki', 'Perempuan', 'Jumlah KK Presejahtera', 'Jumlah KK Sejahtera', 'Jumlah KK Kaya',
+    'Jumlah KK Sedang', 'Jumlah KK Miskin','Buruh', 'Petani', 'Peternak', 'Pedagang', 'Tukang Kayu', 'Tukang Batu', 'Penjahit', 'ASN',
+    'Pensiunan', 'Perangkat Desa', 'Jasa Wiraswasta',
+    'Pengrajin Batik', 'DLL', 'Islam', 'Kristen', 'Protestan', 'Katolik', 'Hindu', 'Budha'];
 
     // Parsing JSON
     var data_mono = JSON.parse('{{info_mono|tojson}}');
