@@ -45,7 +45,7 @@ def expired_token_callback():
 @app.route('/bikin_akun', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        jwt_required()
+        # jwt_required()
         username = request.form.get('username')
         password = request.form.get('password')
 
@@ -73,3 +73,4 @@ def register():
         return redirect(url_for('masuk', msg='Registration Successful'))
 
     return render_template('admin/register.html')
+

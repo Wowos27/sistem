@@ -62,6 +62,11 @@
               <div class="form-group">
                 <input type="text" id="Namalengkapbaru" class="form-control" />
               </div>
+            </form><h4>Nama Alias</h4>
+            <form>
+              <div class="form-group">
+                <input type="text" id="Namalengkapbaru2" class="form-control" />
+              </div>
             </form>
             <h4>Input Gambar</h4>
             <form>
@@ -260,6 +265,12 @@
                       <input type="text" class="form-control" id="editnamalengkapbaru-{{i.id}}" value="{{i.nama_lengkap}}" />
                     </div>
                   </form>
+                    <h4>Nama Alias</h4>
+                  <form>
+                    <div class="form-group">
+                      <input type="text" class="form-control" id="editnamalengkapbaru2-{{i.id}}" value="{{i.nama_alias}}" />
+                    </div>
+                  </form>
                   <h4>Input Gambar Baru</h4>
                   <form>
                     <div class="input-group mb-3">
@@ -420,6 +431,7 @@
     $(document).ready(function () {
       $( "#tambah" ).on( "click", function() {
         var nama = $('#Namalengkapbaru').val()
+        var nama_alias = $('#Namalengkapbaru2').val()
         var formFilebaru = $('#formFilebaru')
         var jabatan = $('#jabatanbaru').val()
         var niap = $('#niapbaru').val()
@@ -432,6 +444,7 @@
         var masajabatan = $('#masajabatanbaru').val()
         var status = $('#statusbaru').val()
           formData.append('nama_lengkap',nama)
+          formData.append('nama_alias',nama_alias)
           jQuery.each(jQuery('#formFilebaru')[0].files, function(i, file) {
             formData.append('gambar', file);
         });
@@ -491,6 +504,7 @@
   function edit(id){
     
     var editnama = $('#editnamalengkapbaru-'+id).val()
+    var editnama_alias = $('#editnamalengkapbaru2-'+id).val()
     var editjabatan = $('#editjabatanbaru-'+id).val()
     var editniap = $('#editniapbaru-'+id).val()
     var editttl = $('#editttlbaru-'+id).val()
@@ -505,6 +519,7 @@
     console.log(reset)
     formData.append('id',id);
     formData.append('nama_lengkap',editnama)
+    formData.append('nama_alias',editnama_alias)
     $.each($('#editfoto-'+id)[0].files, function(i, file) {
       formData.append('gambar', file);
   });

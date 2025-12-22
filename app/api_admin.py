@@ -1069,7 +1069,7 @@ def anggota_ubah_jabatan():
 @jwt_required()
 def tambah_anggota():
     form_data = request.form
-    fields = ['nama_lengkap', 'jabatan', 'niap', 'ttl', 'agama', 'golongan', 'pendidikan_terakhir', 'nomorsk', 'tanggalsk', 'masa_jabatan', 'status']
+    fields = ['nama_lengkap','nama_alias', 'jabatan', 'niap', 'ttl', 'agama', 'golongan', 'pendidikan_terakhir', 'nomorsk', 'tanggalsk', 'masa_jabatan', 'status']
     try:
         random_name = do_image("tambah","anggota","")
         query = f"INSERT INTO anggota ({', '.join(fields + ['gambar'])}) VALUES ({', '.join(['%s'] * (len(fields) + 1))})"
@@ -1084,6 +1084,7 @@ def tambah_anggota():
 def anggota_edit():
     id = request.form['id']
     nama_lengkap = request.form['nama_lengkap']
+    nama_alias = request.form['nama_alias']
     jabatan = request.form['jabatan']
     niap = request.form['niap']
     ttl = request.form['ttl']
@@ -1096,8 +1097,8 @@ def anggota_edit():
     status = request.form['status']
     try:
         do_image("edit","anggota",id)
-        g.con.execute("UPDATE anggota SET nama_lengkap = %s, jabatan = %s, niap = %s, ttl = %s, agama = %s, golongan = %s, pendidikan_terakhir = %s, nomorsk = %s, tanggalsk = %s, masa_jabatan = %s, status = %s WHERE id = %s",
-        (nama_lengkap,jabatan,niap,ttl,agama,golongan,pendidikan_terakhir,nomorsk,tanggalsk,masa_jabatan,status,id))
+        g.con.execute("UPDATE anggota SET nama_lengkap = %s, nama_alias = %s, jabatan = %s, niap = %s, ttl = %s, agama = %s, golongan = %s, pendidikan_terakhir = %s, nomorsk = %s, tanggalsk = %s, masa_jabatan = %s, status = %s WHERE id = %s",
+        (nama_lengkap,nama_alias,jabatan,niap,ttl,agama,golongan,pendidikan_terakhir,nomorsk,tanggalsk,masa_jabatan,status,id))
         mysql.connection.commit()
         return jsonify({"msg" : "SUKSES"})
     except Exception as e:
