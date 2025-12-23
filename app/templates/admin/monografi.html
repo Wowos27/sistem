@@ -430,7 +430,7 @@ fields_mono.forEach(field => {
     data: dataField
   });
 });
-
+console.log(seriesData_mono)
 // Membuat opsi grafik
 var options_mono = {
   series: seriesData_mono,
@@ -507,6 +507,7 @@ function updateChart() {
       data: seriesData
     });
   });
+  console.log(newSeriesData);
   chart_mono.updateOptions({
     series: newSeriesData,
     xaxis: {

@@ -191,6 +191,11 @@
         label4.textContent = "Tahun";
     }
 }
+
+// Fungsi untuk format currency
+function formatCurrency(value) {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+}
 function summary(
     tahun, 
     pesan_pendapatan, jml_anggaran_pendapatan, jml_realisasi_pendapatan, jml_lebih_kurang_pendapatan,
@@ -198,6 +203,8 @@ function summary(
 ) {
     $("#modal-submit").hide()
     // Konten untuk tabel pendapatan
+	const info_list3 = JSON.parse('{{info_list3| tojson | safe}}')
+	console.log(info_list3)
     const pendapatanTable = `
     <div class="table-responsive scroll-table">
         <table class="table custom-table-pendapatan">
@@ -211,19 +218,17 @@ function summary(
                 </tr>
             </thead>
             <tbody>
-        {% for i in info_list3 %}
-        {% if i.type=='pendapatan' %}
+				${info_list3.filter(item => item.type === 'pendapatan' && item.tahun === tahun).map((item, index) => `
+				  <tr>
+					<td>${index + 1}</td>
+					<td>${item.uraian}</td>
+					<td>${formatCurrency(item.anggaran)}</td>
+					<td>${formatCurrency(item.realisasi)}</td>
+					<td>${formatCurrency(item.lebih_kurang)}</td>
+				  </tr>
+				`).join('')}
                 <tr>
-                    <td>{{ i.no | angka_ke_huruf}}</td>
-                    <td>{{ i.uraian }} </td>
-                    <td>{{ i.anggaran | clean_currency | format_currency }}</td>
-                    <td>{{ i.realisasi | format_currency }}</td>
-                    <td>{{ i.lebih_kurang | format_currency }}</td>
-                </tr>
-        {% endif %}
-        {% endfor %}
-                <tr>
-                <td></td>
+					<td></td>
                     <td>Jumlah</td>
                     <td>${jml_anggaran_pendapatan}</td>
                     <td>${jml_realisasi_pendapatan}</td>
@@ -248,19 +253,17 @@ function summary(
                 </tr>
             </thead>
             <tbody>
-        {% for i in info_list3 %}
-        {% if i.type=='pengeluaran' %}
+				 ${info_list3.filter(item => item.type === 'pengeluaran' && item.tahun === tahun).map((item, index) => `
+				  <tr>
+                    <td>${index + 1}</td>
+					<td>${item.uraian}</td>
+					<td>${formatCurrency(item.anggaran)}</td>
+					<td>${formatCurrency(item.realisasi)}</td>
+					<td>${formatCurrency(item.lebih_kurang)}</td>
+				  </tr>
+				 `).join('')}
                 <tr>
-                    <td>{{ i.no | angka_ke_huruf}}</td>
-                    <td>{{ i.uraian }} </td>
-                    <td>{{ i.anggaran | clean_currency | format_currency }}</td>
-                    <td>{{ i.realisasi | format_currency }}</td>
-                    <td>{{ i.lebih_kurang | format_currency }}</td>
-                </tr>
-        {% endif %}
-        {% endfor %}
-                <tr>
-                <td></td>
+					<td></td>
                     <td><strong>Jumlah</strong></td>
                     <td><strong>${jml_anggaran_pengeluaran}</strong></td>
                     <td><strong>${jml_realisasi_pengeluaran}</strong></td>
