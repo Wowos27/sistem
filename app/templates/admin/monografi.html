@@ -371,22 +371,9 @@
 {% endblock %}
 {% block js%}
 <script>
-var data = JSON.parse('{{info_mono|tojson}}');
+var data = JSON.parse('{{ info_mono|tojson }}');
 
-// label yg akan ditampilkan di grafik
-var fields_mono = [
-  'Jumlah Penduduk', 'Jumlah Kepala Keluarga', 
-  'laki-laki', 'Perempuan', 
-  'Jumlah KK Presejahtera', 'Jumlah KK Sejahtera', 
-  'Jumlah KK Kaya', 'Jumlah KK Sedang', 'Jumlah KK Miskin',
-  'Buruh', 'Petani', 'Peternak', 'Pedagang', 
-  'Tukang Kayu', 'Tukang Batu', 'Penjahit', 
-  'ASN', 'Pensiunan', 'Perangkat Desa', 
-  'Jasa Wiraswasta', 'Pengrajin Batik', 'DLL', 
-  'Islam', 'Kristen', 'Protestan', 'Katolik', 'Hindu', 'Budha'
-];
-
-// mapping data
+// mapping key -> label panjang (buat tampil di chart)
 const mapping = {
   "jpenduduk": "Jumlah Penduduk",
   "laki": "laki-laki",
@@ -417,29 +404,24 @@ const mapping = {
   "budha": "Budha"
 };
 
+// ✅ pakai key sebagai “fields” yang valid
+const fieldsKey_mono = Object.keys(mapping);
+
 // Mengambil tahun dari data
 var tahun = data.map(item => item.tahun);
 
-// Mengambil data untuk grafik
-var seriesData_mono = [];
-fields_mono.forEach(field => {
-  var key = Object.keys(mapping).find(k => mapping[k] === field);
-  var dataField = data.map(item => item[key]);
-  seriesData_mono.push({
-    name: field,
-    data: dataField
-  });
-});
-console.log(seriesData_mono)
-// Membuat opsi grafik
+// ====== initial chart: series per kategori, xaxis = tahun ======
+var seriesData_mono = fieldsKey_mono.map(key => ({
+  name: mapping[key],
+  data: data.map(item => item[key] ?? 0)
+}));
+
 var options_mono = {
   series: seriesData_mono,
   chart: {
     type: "bar",
     height: 260,
-    toolbar: {
-      show: false,
-    },
+    toolbar: { show: false },
   },
   plotOptions: {
     bar: {
@@ -449,35 +431,22 @@ var options_mono = {
       borderRadius: 5,
     },
   },
-  dataLabels: {
-    enabled: false,
-  },
-  xaxis: {
-    categories: tahun,
-  },
-  yaxis: {
-    show: true,
-  },
-  stroke: {
-    show: true,
-    width: 5,
-    colors: ["transparent"],
-  },
-  tooltip: {
-    theme: "dark",
-  },
+  dataLabels: { enabled: false },
+  xaxis: { categories: tahun },
+  yaxis: { show: true },
+  stroke: { show: true, width: 5, colors: ["transparent"] },
+  tooltip: { theme: "dark" },
 };
 
-// Membuat dan merender grafik
 var chart_mono = new ApexCharts($("#chart_mono")[0], options_mono);
 chart_mono.render();
+
+// ====== lookup cepat: dataByYear_mono[tahun][key] = angka ======
 var dataByYear_mono = {};
 data.forEach(item => {
-  if (!dataByYear_mono[item.tahun]) {
-    dataByYear_mono[item.tahun] = {};
-  }
-  Object.keys(mapping).forEach(key => {
-    dataByYear_mono[item.tahun][key] = item[key];
+  dataByYear_mono[item.tahun] = {};
+  fieldsKey_mono.forEach(key => {
+    dataByYear_mono[item.tahun][key] = item[key] ?? 0;
   });
 });
 
@@ -490,64 +459,62 @@ function getSelectedValues(selectElement) {
   return selected;
 }
 
-// Fungsi untuk memperbarui grafik
+// ✅ Fungsi untuk memperbarui grafik
 function updateChart() {
-  var yearDropdown = $("#yearDropdownmono");
-  var categoryDropdown = $("#categoryDropdownmono");
-  var selectedYears = getSelectedValues(yearDropdown);
-  var selectedCategories = getSelectedValues(categoryDropdown);
-  var newSeriesData = [];
-  selectedYears.forEach(year => {
-    var seriesData = [];
-    selectedCategories.forEach(category => {
-      seriesData.push(dataByYear_mono[year][category] || 0);
-    });
-    newSeriesData.push({
-      name: year,
-      data: seriesData
-    });
-  });
-  console.log(newSeriesData);
+  var selectedYears = getSelectedValues($("#yearDropdownmono"));
+  var selectedCategories = getSelectedValues($("#categoryDropdownmono"));
+
+  // fallback kalau belum milih apa-apa
+  var years = selectedYears.length ? selectedYears : tahun;
+  var keys = selectedCategories.length ? selectedCategories : fieldsKey_mono;
+
+  // xaxis harus label panjang (bukan key)
+  var xLabels = keys.map(k => mapping[k] ?? k);
+
+  // ✅ series per tahun (biar dropdown tahun/kategori masuk akal)
+  var newSeriesData = years.map(year => ({
+    name: year,
+    data: keys.map(k => (dataByYear_mono[year]?.[k] ?? 0))
+  }));
+
   chart_mono.updateOptions({
     series: newSeriesData,
-    xaxis: {
-      categories: selectedCategories.length > 0 ? selectedCategories : Object.keys(mapping)
-    }
+    xaxis: { categories: xLabels }
   });
 }
 
-// Event listener untuk dropdown
-$("#yearDropdownmono").on('change', function () {
-  updateChart();
-});
+// Event listener dropdown
+$("#yearDropdownmono").on('change', updateChart);
+$("#categoryDropdownmono").on('change', updateChart);
 
-$("#categoryDropdownmono").on('change', function () {
-  updateChart();
-});
-
-// Fungsi untuk menghandle perubahan tahun
+// ====== FORM CHANGE (edit by tahun) ======
 function change() {
   var value = $('#tahun').val();
-  data.forEach(field => {
-    $(`[name=${field}]`).val(data.find(item => item.tahun == value)[field]);
+  var row = data.find(item => String(item.tahun) === String(value));
+  if (!row) return;
+
+  // isi input form berdasarkan key mapping
+  fieldsKey_mono.forEach(key => {
+    $(`[name="${key}"]`).val(row[key] ?? 0);
   });
 }
 
-// Event listener untuk dropdown tahun
-$('#tahun').on('change', function () {
-  change();
-});
-// Fungsi untuk mengurutkan tahun
+$('#tahun').on('change', change);
+
+// Fungsi sort tahun
 function sort_tahun() {
   var selectElement = document.getElementById('tahun');
   var optionsArray = Array.from(selectElement.options);
+
   optionsArray.sort(function (a, b) {
-    return a.value - b.value;
+    return Number(a.value) - Number(b.value);
   });
+
   selectElement.innerHTML = '';
   optionsArray.forEach(function (option) {
     selectElement.appendChild(option);
   });
+
   change();
 }
     $('#tambah_tahun').on('click', function () {

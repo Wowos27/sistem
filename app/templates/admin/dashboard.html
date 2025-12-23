@@ -1,405 +1,330 @@
-{% extends 'include/include.html' %} {% block content %}
-<head>
-  <style>
+{% extends 'include/include.html' %}
+
+{% block content %}
+
+<style>
   .table-responsive {
-    overflow-x: auto; /* Menambahkan scroll horizontal jika diperlukan */
+    overflow-x: auto;
   }
-  
 </style>
-</head>
+
 <div class="page-titles">
-    <div class="row">
-      <div class="col-lg-8 col-md-6 col-12 align-self-center">
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb mb-0 d-flex align-items-center">
-            <li class="breadcrumb-item">
-              <a href="index.html" class="link"
-                ><i class="ri-home-3-line fs-5"></i
-              ></a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">admin/dashboard</li>
-          </ol>
-        </nav>
-        <h1 class="mb-0 fw-bold">Dashboard</h1>
-      </div>
+  <div class="row">
+    <div class="col-lg-8 col-md-6 col-12 align-self-center">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 d-flex align-items-center">
+          <li class="breadcrumb-item">
+            <a href="index.html" class="link"><i class="ri-home-3-line fs-5"></i></a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">admin/dashboard</li>
+        </ol>
+      </nav>
+      <h1 class="mb-0 fw-bold">Dashboard</h1>
     </div>
   </div>
+</div>
 
-  <div class="container-fluid">
-    <!-- ============================================================= -->
-    <!-- Start Page Content -->
-    <!-- ============================================================= -->
-    <!-- Row -->
-    <div class="row">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-body">
-            <h4 class="card-title">Welcome admin {{ session['username'] }}</h4>
-            <h6 class="card-subtitle mb-0">
-              anda dapat mengedit data yang ada di tampilan user
-            </h6>
-          </div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Welcome admin {{ session['username'] }}</h4>
+          <h6 class="card-subtitle mb-0">anda dapat mengedit data yang ada di tampilan user</h6>
         </div>
       </div>
-      <div class="col-12">
-        <h1> Grafik Monografi</h1>
-      </div> 
-      <div class="col-lg-12">
-        <div class="card w-100">
-          <div class="card-body">
-            <div class="d-md-flex align-items-center">
-              <div>
-                <h3 class="card-title">Monografi desa</h3>
-                <h6 class="card-subtitle">Grafik perbandingan menografi desa per tahun</h6>
-              </div>
-              <div class="ms-auto">
-                <ul class="list-style-none">
-                  <div class="container-fluid">
-                    <div class="row mb-4">
-                      <div class="col-lg-6">
-                        <label for="categoryDropdown">Pilih Kategori:</label>
-                        <select id="categoryDropdownmono" style="min-width: 150px;" class="form-control" multiple>
-                          {% for field in fields_mono %}
-                          <option value="{{ field.value }}">{{ field.name }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                      <div class="col-lg-6">
-                        <label for="yearDropdown">Pilih Tahun:</label>
-                        <select id="yearDropdownmono" class="form-control" multiple>
-                          {% for item in info_mono %}
-                          <option value="{{ item.tahun }}">{{ item.tahun }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
+    </div>
+
+    <div class="col-12">
+      <h1>Grafik Monografi</h1>
+    </div>
+
+    <!-- MONOGRAFI -->
+    <div class="col-lg-12">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="d-md-flex align-items-center">
+            <div>
+              <h3 class="card-title">Monografi desa</h3>
+              <h6 class="card-subtitle">Grafik perbandingan monografi desa per tahun</h6>
+            </div>
+
+            <div class="ms-auto">
+              <div class="container-fluid">
+                <div class="row mb-4">
+                  <div class="col-lg-6">
+                    <label for="categoryDropdownmono">Pilih Kategori:</label>
+                    <select id="categoryDropdownmono" style="min-width: 150px;" class="form-control" multiple>
+                      <option value="jpenduduk">Jumlah Penduduk</option>
+                      <option value="laki">laki-laki</option>
+                      <option value="perempuan">Perempuan</option>
+                      <option value="jkkprese">Jumlah KK Presejahtera</option>
+                      <option value="jkkseja">Jumlah KK Sejahtera</option>
+                      <option value="jkkkaya">Jumlah KK Kaya</option>
+                      <option value="jkksedang">Jumlah KK Sedang</option>
+                      <option value="jkkmiskin">Jumlah KK Miskin</option>
+                      <option value="buruh">Buruh</option>
+                      <option value="petani">Petani</option>
+                      <option value="peternak">Peternak</option>
+                      <option value="pedagang">Pedagang</option>
+                      <option value="tukangkayu">Tukang Kayu</option>
+                      <option value="tukangbatu">Tukang Batu</option>
+                      <option value="penjahit">Penjahit</option>
+                      <option value="asn">ASN</option>
+                      <option value="pensiunan">Pensiunan</option>
+                      <option value="perangkatdesa">Perangkat Desa</option>
+                      <option value="jasa_wiraswasta">Jasa Wiraswasta</option>
+                      <option value="pengrajinbatik">Pengrajin Batik</option>
+                      <option value="dll">DLL</option>
+                      <option value="islam">Islam</option>
+                      <option value="kristen">Kristen</option>
+                      <option value="protestan">Protestan</option>
+                      <option value="katolik">Katolik</option>
+                      <option value="hindu">Hindu</option>
+                      <option value="budha">Budha</option>
+                    </select>
                   </div>
-                </ul>
+
+                  <div class="col-lg-6">
+                    <label for="yearDropdownmono">Pilih Tahun:</label>
+                    <select id="yearDropdownmono" class="form-control" multiple>
+                      {% for item in info_mono %}
+                        <option value="{{ item.tahun }}">{{ item.tahun }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="table-responsive">
+          </div>
+
+          <div class="table-responsive">
             <div id="chart_mono" class="mt-4"></div>
           </div>
-          </div>
         </div>
       </div>
-      <div class="col-lg-6">
-        <div class="card w-100">
-          <div class="card-body">
-            <div class="d-md-flex align-items-center">
-              <div class="col-md-8 col-lg-3">
-                <h3 class="card-title">Geografi</h3>
-                <h6 class="card-subtitle">Grafik Perubahan Geografi Desa (luas wilayah)</h6>
-              </div>
-              <div class="ms-auto ">
-                <ul class="list-style-none">
-                  <div class="container-fluid p-0">
-                    <div class="row mb-4">
-                      <div class="col-lg-6">
-                        <label for="categoryDropdown">Pilih Kategori:</label>
-                        <select id="categoryDropdowngeo" style="min-width: 150px;" class="form-control" multiple>
-                          {% for field in fields_geo %}
-                          <option value="{{ field.value }}">{{ field.name }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                      <div class="col-lg-6">
-                        <label for="yearDropdown">Pilih Tahun:</label>
-                        <select id="yearDropdowngeo" class="form-control" multiple>
-                          {% for item in info_geo %}
-                          <option value="{{ item.tahun }}">{{ item.tahun }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
+    </div>
+
+    <!-- GEOGRAFI -->
+    <div class="col-lg-6">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="d-md-flex align-items-center">
+            <div class="col-md-8 col-lg-6">
+              <h3 class="card-title">Geografi</h3>
+              <h6 class="card-subtitle">Grafik Perubahan Geografi Desa (luas wilayah)</h6>
+            </div>
+
+            <div class="ms-auto">
+              <div class="container-fluid p-0">
+                <div class="row mb-4">
+                  <div class="col-lg-6">
+                    <label for="categoryDropdowngeo">Pilih Kategori:</label>
+                    <select id="categoryDropdowngeo" style="min-width: 150px;" class="form-control" multiple>
+                      {% for field in fields_geo %}
+                        <option value="{{ field.value }}">{{ field.name }}</option>
+                      {% endfor %}
+                    </select>
                   </div>
-                </ul>
+
+                  <div class="col-lg-6">
+                    <label for="yearDropdowngeo">Pilih Tahun:</label>
+                    <select id="yearDropdowngeo" class="form-control" multiple>
+                      {% for item in info_geo %}
+                        <option value="{{ item.tahun }}">{{ item.tahun }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="table-responsive">
+          </div>
+
+          <div class="table-responsive">
             <div id="chart_geo" class="mt-4"></div>
-            </div>
           </div>
         </div>
       </div>
-      </div>
-    {% endblock %}
+    </div>
 
-    {% block js %}
-    <script>
-    $(document).ready(function() {
-    function getRandomColor() {
-        let letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
+  </div> {# end row #}
+</div> {# end container-fluid #}
 
-    function colorDistance(color1, color2) {
-        let r1 = parseInt(color1.slice(1, 3), 16);
-        let g1 = parseInt(color1.slice(3, 5), 16);
-        let b1 = parseInt(color1.slice(5, 7), 16);
+{% endblock %}
 
-        let r2 = parseInt(color2.slice(1, 3), 16);
-        let g2 = parseInt(color2.slice(3, 5), 16);
-        let b2 = parseInt(color2.slice(5, 7), 16);
+{% block js %}
+<script>
+$(document).ready(function() {
 
-        return Math.sqrt(
-            (r2 - r1) * (r2 - r1) +
-            (g2 - g1) * (g2 - g1) +
-            (b2 - b1) * (b2 - b1)
-        );
-    }
-
-    function generateRandomColors(count, minDistance = 100) {
-        let colors = [];
-        while (colors.length < count) {
-            let color = getRandomColor();
-            let isUnique = colors.every(existingColor => colorDistance(color, existingColor) > minDistance);
-
-            if (isUnique) {
-                colors.push(color);
-            }
-        }
-        return colors;
-    }
-
-    var fields_mono = ['Jumalah Penduduk', 'Jumlah Kepala Keluarga', 'laki-laki', 'Perempuan', 'Jumlah KK Presejahtera', 'Jumlah KK Sejahtera', 'Jumlah KK Kaya',
-    'Jumlah KK Sedang', 'Jumlah KK Miskin','Buruh', 'Petani', 'Peternak', 'Pedagang', 'Tukang Kayu', 'Tukang Batu', 'Penjahit', 'ASN',
-    'Pensiunan', 'Perangkat Desa', 'Jasa Wiraswasta',
-    'Pengrajin Batik', 'DLL', 'Islam', 'Kristen', 'Protestan', 'Katolik', 'Hindu', 'Budha'];
-
-    // Parsing JSON
-    var data_mono = JSON.parse('{{info_mono|tojson}}');
-    console.log(data_mono);
-
-    // Memisahkan data_mono berdasarkan tahun
-    var dataByYear_mono = data_mono.reduce(function(acc, item) {
-        if (!acc[item.tahun]) {
-            acc[item.tahun] = {};
-        }
-        $.each(fields_mono, function(index, field) {
-            if (!acc[item.tahun][field]) {
-                acc[item.tahun][field] = [];
-            }
-            acc[item.tahun][field].push(item[field]);
-        });
-        return acc;
-    }, {});
-
-    // Mengambil kategori dari fields_mono
-    var categories_mono = fields_mono;
-
-    // Menyiapkan data untuk grafik
-    var seriesData_mono = [];
-    var colors_mono = []
-    $.each(Object.keys(dataByYear_mono), function(index, year) {
-        let color = generateRandomColors(1, 100)[0]; // Ambil satu warna dengan jarak minimum 100
-        seriesData_mono.push({
-            name: year,
-            data: $.map(fields_mono, function(field) {
-                return dataByYear_mono[year][field] ? dataByYear_mono[year][field][0] : 0; // Ambil nilai pertama dari array data
-            }),
-            color: color // Assign the generated color to this series
-        });
-        colors_mono.push(color);
+  function getSelectedValues(selectElement) {
+    const selected = [];
+    $(selectElement).find('option:selected').each(function() {
+      selected.push($(this).val());
     });
+    return selected;
+  }
 
-    // Membuat opsi grafik
-    var options_mono = {
-        series: seriesData_mono,
-        chart: {
-            type: "bar",
-            height: 260,
-            toolbar: {
-                show: false,
-            },
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: "42%",
-                endingShape: "rounded",
-                borderRadius: 5,
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        xaxis: {
-            categories: categories_mono,
-        },
-        yaxis: {
-            show: true,
-        },
-        stroke: {
-            show: true,
-            width: 5,
-            colors: ["transparent"],
-        },
-        tooltip: {
-            theme: "dark",
-        },
-    };
+  // ====== MONOGRAFI ======
+  const data_mono = JSON.parse('{{ info_mono|tojson }}');
 
-    // Membuat dan merender grafik
-    var chart_mono = new ApexCharts($("#chart_mono")[0], options_mono);
-    chart_mono.render();
+  // mapping key -> label panjang (buat xaxis)
+  const mapping = {
+    "jpenduduk": "Jumlah Penduduk",
+    "laki": "laki-laki",
+    "perempuan": "Perempuan",
+    "jkkprese": "Jumlah KK Presejahtera",
+    "jkkseja": "Jumlah KK Sejahtera",
+    "jkkkaya": "Jumlah KK Kaya",
+    "jkksedang": "Jumlah KK Sedang",
+    "jkkmiskin": "Jumlah KK Miskin",
+    "buruh": "Buruh",
+    "petani": "Petani",
+    "peternak": "Peternak",
+    "pedagang": "Pedagang",
+    "tukangkayu": "Tukang Kayu",
+    "tukangbatu": "Tukang Batu",
+    "penjahit": "Penjahit",
+    "asn": "ASN",
+    "pensiunan": "Pensiunan",
+    "perangkatdesa": "Perangkat Desa",
+    "jasa_wiraswasta": "Jasa Wiraswasta",
+    "pengrajinbatik": "Pengrajin Batik",
+    "dll": "DLL",
+    "islam": "Islam",
+    "kristen": "Kristen",
+    "protestan": "Protestan",
+    "katolik": "Katolik",
+    "hindu": "Hindu",
+    "budha": "Budha"
+  };
 
-    var fields_geo = ["sawahteri", "luas", "sawahhu", "pemukiman"];
+  // default kategori mono = semua key yang ada di mapping (urutan sesuai mapping)
+  const defaultKeysMono = Object.keys(mapping);
 
-    // Parsing JSON
-    var data_geo = JSON.parse('{{info_geo|tojson}}');
-    console.log(data_geo);
-
-    // Memisahkan data_geo berdasarkan tahun
-    var dataByYear_geo = data_geo.reduce(function(acc, item) {
-        if (!acc[item.tahun]) {
-            acc[item.tahun] = {};
-        }
-        $.each(fields_geo, function(index, field) {
-            if (!acc[item.tahun][field]) {
-                acc[item.tahun][field] = [];
-            }
-            acc[item.tahun][field].push(item[field]);
-        });
-        return acc;
-    }, {});
-
-    // Mengambil kategori dari fields_geo
-    var categories_geo = fields_geo;
-
-    // Menyiapkan data untuk grafik
-    var seriesData_geo = [];
-    var colors_geo = []
-    $.each(Object.keys(dataByYear_geo), function(index, year) {
-        let color = generateRandomColors(1, 100)[0]; // Ambil satu warna dengan jarak minimum 100
-        seriesData_geo.push({
-            name: year,
-            data: $.map(fields_geo, function(field) {
-                return dataByYear_geo[year][field] ? dataByYear_geo[year][field][0] : 0; // Ambil nilai pertama dari array data
-            }),
-            color: color // Assign the generated color to this series
-        });
-        colors_geo.push(color)
+  // dataByYear_mono[tahun][key] = angka
+  const dataByYear_mono = {};
+  data_mono.forEach(item => {
+    dataByYear_mono[item.tahun] = {};
+    defaultKeysMono.forEach(key => {
+      dataByYear_mono[item.tahun][key] = (item[key] ?? 0);
     });
+  });
 
-    // Membuat opsi grafik
-    var options_geo = {
-        series: seriesData_geo,
-        chart: {
-            type: "bar",
-            height: 260,
-            toolbar: {
-                show: false,
-            },
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: "42%",
-                endingShape: "rounded",
-                borderRadius: 5,
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        xaxis: {
-            categories: categories_geo,
-        },
-        yaxis: {
-            show: true,
-        },
-        stroke: {
-            show: true,
-            width: 5,
-            colors: ["transparent"],
-        },
-        tooltip: {
-            theme: "dark",
-        },
-    };
+  // initial series: tampilkan per kategori (biar sama seperti awal kamu)
+  const tahun_mono = data_mono.map(x => x.tahun);
+  const seriesData_mono = defaultKeysMono.map(key => ({
+    name: mapping[key],
+    data: data_mono.map(item => (item[key] ?? 0))
+  }));
 
-    var chart_geo = new ApexCharts($("#chart_geo")[0], options_geo);
-    chart_geo.render();
+  const options_mono = {
+    series: seriesData_mono,
+    chart: { type: "bar", height: 260, toolbar: { show: false } },
+    plotOptions: {
+      bar: { horizontal: false, columnWidth: "42%", endingShape: "rounded", borderRadius: 5 }
+    },
+    dataLabels: { enabled: false },
+    xaxis: { categories: tahun_mono },
+    yaxis: { show: true },
+    stroke: { show: true, width: 5, colors: ["transparent"] },
+    tooltip: { theme: "dark" }
+  };
 
-    function getSelectedValues(selectElement) {
-        var selected = [];
-        $(selectElement).find('option:selected').each(function() {
-            selected.push($(this).val());
-        });
-        return selected;
+  const chart_mono = new ApexCharts($("#chart_mono")[0], options_mono);
+  chart_mono.render();
+
+  // ====== GEOGRAFI ======
+  const fields_geo = ["sawahteri", "luas", "sawahhu", "pemukiman"];
+  const data_geo = JSON.parse('{{ info_geo|tojson }}');
+	// mapping key -> label panjang (buat xaxis)
+  const mapping_geo = {
+  "sawahteri": "Sawah Teri", 
+  "luas": "Luas Wilayah", 
+  "sawahhu": "Sawah Hutan", 
+  "pemukiman": "Pemukiman"
+  }
+  const dataByYear_geo = data_geo.reduce(function(acc, item) {
+    if (!acc[item.tahun]) acc[item.tahun] = {};
+    fields_geo.forEach(field => {
+      acc[item.tahun][field] = (item[field] ?? 0);
+    });
+    return acc;
+  }, {});
+
+  var categories_geo = fields_geo.map(k => mapping_geo[k] ?? k);
+  // initial series geo: 1 series per tahun
+  const seriesData_geo = Object.keys(dataByYear_geo).map(year => ({
+    name: year,
+    data: fields_geo.map(field => dataByYear_geo[year]?.[field] ?? 0),
+  }));
+
+  const options_geo = {
+    series: seriesData_geo,
+    chart: { type: "bar", height: 260, toolbar: { show: false } },
+    plotOptions: {
+      bar: { horizontal: false, columnWidth: "42%", endingShape: "rounded", borderRadius: 5 }
+    },
+    dataLabels: { enabled: false },
+    xaxis: { categories: categories_geo },
+    yaxis: { show: true },
+    stroke: { show: true, width: 5, colors: ["transparent"] },
+    tooltip: { theme: "dark" }
+  };
+
+  const chart_geo = new ApexCharts($("#chart_geo")[0], options_geo);
+  chart_geo.render();
+
+  // ====== UPDATE CHART (FILTER) ======
+  function updateChart(init) {
+    const year_id = "#yearDropdown" + init;
+    const categori_id = "#categoryDropdown" + init;
+
+    const selectedYears = getSelectedValues($(year_id));
+    const selectedCategories = getSelectedValues($(categori_id));
+
+    if (init === "mono") {
+      const years = selectedYears.length ? selectedYears : tahun_mono;
+      const keys = selectedCategories.length ? selectedCategories : defaultKeysMono;
+
+      const xLabels = keys.map(k => mapping[k] ?? k);
+
+      // 1 series per tahun, xaxis = kategori (label panjang)
+      const newSeriesData = years.map(year => ({
+        name: year,
+        data: keys.map(k => (dataByYear_mono[year]?.[k] ?? 0))
+      }));
+
+      chart_mono.updateOptions({
+        series: newSeriesData,
+        xaxis: { categories: xLabels }
+      });
+
+    } else if (init === "geo") {
+      const years = selectedYears.length ? selectedYears : Object.keys(dataByYear_geo);
+      const cats = selectedCategories.length ? selectedCategories : categories_geo;
+
+      const newSeriesData = years.map(year => ({
+        name: year,
+        data: cats.map(cat => (dataByYear_geo[year]?.[cat] ?? 0))
+      }));
+
+      const geoKeys = selectedCategories.length ? selectedCategories : fields_geo;
+		const geoLabels = geoKeys.map(k => mapping_geo[k] ?? k);
+
+		chart_geo.updateOptions({
+		  series: newSeriesData,
+		  xaxis: {
+			categories: geoLabels
+		  }
+		});
     }
+  }
 
-    function updateChart(init) {
-        var year_id = "#yearDropdown" + init;
-        console.log(year_id);
-        var categori_id = "#categoryDropdown" + init;
-        console.log(categori_id);
-        var yearDropdown = $(year_id);
-        var categoryDropdown = $(categori_id);
-        var selectedYears = getSelectedValues(yearDropdown);
-        console.log(selectedYears);
-        var selectedCategories = getSelectedValues(categoryDropdown);
-        console.log(selectedCategories);
+  $("#yearDropdownmono").on('change', function() { updateChart("mono"); });
+  $("#categoryDropdownmono").on('change', function() { updateChart("mono"); });
+  $("#yearDropdowngeo").on('change', function() { updateChart("geo"); });
+  $("#categoryDropdowngeo").on('change', function() { updateChart("geo"); });
 
-        var newSeriesData = [];
-        var newSeriesData = [];
-    if (init == "mono") {
-        $.each(selectedYears, function(index, year) {
-            var seriesData = [];
-            $.each(selectedCategories, function(index, category) {
-                if (dataByYear_mono[year] && dataByYear_mono[year][category]) {
-                    seriesData.push(dataByYear_mono[year][category][0]); // Mengambil data untuk kategori dan tahun
-                } else {
-                    seriesData.push(0);
-                }
-            });
-            newSeriesData.push({
-                name: year,
-                data: seriesData
-            });
-        });
-        
-        chart_mono.updateOptions({
-            series: newSeriesData,
-            xaxis: {
-                categories: selectedCategories.length > 0 ? selectedCategories : categories_mono
-            }
-        });
-    } else if (init == "geo") {
-        $.each(selectedYears, function(index, year) {
-            var seriesData = [];
-            $.each(selectedCategories, function(index, category) {
-                if (dataByYear_geo[year] && dataByYear_geo[year][category]) {
-                    seriesData.push(dataByYear_geo[year][category][0]); // Mengambil data untuk kategori dan tahun
-                } else {
-                    seriesData.push(0);
-                }
-            });
-            newSeriesData.push({
-                name: year,
-                data: seriesData
-            });
-        });
-
-        chart_geo.updateOptions({
-            series: newSeriesData,
-            xaxis: {
-                categories: selectedCategories.length > 0 ? selectedCategories : categories_geo
-            }
-        });
-    }
-    }
-
-    $("#yearDropdownmono").on('change', function() { updateChart("mono"); });
-    $("#categoryDropdownmono").on('change', function() { updateChart("mono"); });
-    $("#yearDropdowngeo").on('change', function() { updateChart("geo"); });
-    $("#categoryDropdowngeo").on('change', function() { updateChart("geo"); });
 });
-
-    </script>
+</script>
 {% endblock %}
