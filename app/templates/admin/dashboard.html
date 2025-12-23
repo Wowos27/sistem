@@ -126,280 +126,200 @@
     {% endblock %}
 
     {% block js %}
-    <script>
-    $(document).ready(function() {
-    function getRandomColor() {
-        let letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
-
-    function colorDistance(color1, color2) {
-        let r1 = parseInt(color1.slice(1, 3), 16);
-        let g1 = parseInt(color1.slice(3, 5), 16);
-        let b1 = parseInt(color1.slice(5, 7), 16);
-
-        let r2 = parseInt(color2.slice(1, 3), 16);
-        let g2 = parseInt(color2.slice(3, 5), 16);
-        let b2 = parseInt(color2.slice(5, 7), 16);
-
-        return Math.sqrt(
-            (r2 - r1) * (r2 - r1) +
-            (g2 - g1) * (g2 - g1) +
-            (b2 - b1) * (b2 - b1)
-        );
-    }
-
-    function generateRandomColors(count, minDistance = 100) {
-        let colors = [];
-        while (colors.length < count) {
-            let color = getRandomColor();
-            let isUnique = colors.every(existingColor => colorDistance(color, existingColor) > minDistance);
-
-            if (isUnique) {
-                colors.push(color);
-            }
-        }
-        return colors;
-    }
-
-    var fields_mono = ['Jumalah Penduduk', 'Jumlah Kepala Keluarga', 'laki-laki', 'Perempuan', 'Jumlah KK Presejahtera', 'Jumlah KK Sejahtera', 'Jumlah KK Kaya',
-    'Jumlah KK Sedang', 'Jumlah KK Miskin','Buruh', 'Petani', 'Peternak', 'Pedagang', 'Tukang Kayu', 'Tukang Batu', 'Penjahit', 'ASN',
-    'Pensiunan', 'Perangkat Desa', 'Jasa Wiraswasta',
-    'Pengrajin Batik', 'DLL', 'Islam', 'Kristen', 'Protestan', 'Katolik', 'Hindu', 'Budha'];
-
-    // Parsing JSON
+<script>
+$(document).ready(function() {
+    // --- KONFIGURASI DATA MONOGRAFI ---
     var data_mono = JSON.parse('{{info_mono|tojson}}');
-    console.log(data_mono);
-
-    // Memisahkan data_mono berdasarkan tahun
-    var dataByYear_mono = data_mono.reduce(function(acc, item) {
-        if (!acc[item.tahun]) {
-            acc[item.tahun] = {};
-        }
-        $.each(fields_mono, function(index, field) {
-            if (!acc[item.tahun][field]) {
-                acc[item.tahun][field] = [];
-            }
-            acc[item.tahun][field].push(item[field]);
-        });
-        return acc;
-    }, {});
-
-    // Mengambil kategori dari fields_mono
-    var categories_mono = fields_mono;
-
-    // Menyiapkan data untuk grafik
-    var seriesData_mono = [];
-    var colors_mono = []
-    $.each(Object.keys(dataByYear_mono), function(index, year) {
-        let color = generateRandomColors(1, 100)[0]; // Ambil satu warna dengan jarak minimum 100
-        seriesData_mono.push({
-            name: year,
-            data: $.map(fields_mono, function(field) {
-                return dataByYear_mono[year][field] ? dataByYear_mono[year][field][0] : 0; // Ambil nilai pertama dari array data
-            }),
-            color: color // Assign the generated color to this series
-        });
-        colors_mono.push(color);
-    });
-
-    // Membuat opsi grafik
-    var options_mono = {
-        series: seriesData_mono,
-        chart: {
-            type: "bar",
-            height: 260,
-            toolbar: {
-                show: false,
-            },
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: "42%",
-                endingShape: "rounded",
-                borderRadius: 5,
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        xaxis: {
-            categories: categories_mono,
-        },
-        yaxis: {
-            show: true,
-        },
-        stroke: {
-            show: true,
-            width: 5,
-            colors: ["transparent"],
-        },
-        tooltip: {
-            theme: "dark",
-        },
+    
+    const mapping_mono = {
+        "jpenduduk": "Jumlah Penduduk", "laki": "laki-laki", "perempuan": "Perempuan",
+        "jkkprese": "Jumlah KK Presejahtera", "jkkseja": "Jumlah KK Sejahtera", "jkkkaya": "Jumlah KK Kaya",
+        "jkksedang": "Jumlah KK Sedang", "jkkmiskin": "Jumlah KK Miskin", "buruh": "Buruh",
+        "petani": "Petani", "peternak": "Peternak", "pedagang": "Pedagang",
+        "tukangkayu": "Tukang Kayu", "tukangbatu": "Tukang Batu", "penjahit": "Penjahit",
+        "asn": "ASN", "pensiunan": "Pensiunan", "perangkatdesa": "Perangkat Desa",
+        "jasa_wiraswasta": "Jasa Wiraswasta", "pengrajinbatik": "Pengrajin Batik", "dll": "DLL",
+        "islam": "Islam", "kristen": "Kristen", "protestan": "Protestan",
+        "katolik": "Katolik", "hindu": "Hindu", "budha": "Budha"
     };
 
-    // Membuat dan merender grafik
+    var tahun_mono = data_mono.map(item => item.tahun);
+    var seriesData_mono = Object.keys(mapping_mono).map(key => {
+        return {
+            name: mapping_mono[key],
+            data: data_mono.map(item => item[key])
+        };
+    });
+
+    // --- INISIALISASI GRAFIK MONOGRAFI ---
+    var options_mono = {
+        series: seriesData_mono,
+        chart: { type: "bar", height: 260, toolbar: { show: false } },
+        plotOptions: { bar: { horizontal: false, columnWidth: "42%", borderRadius: 5 } },
+        xaxis: { categories: tahun_mono },
+        tooltip: { theme: "dark" }
+    };
+
     var chart_mono = new ApexCharts($("#chart_mono")[0], options_mono);
     chart_mono.render();
 
-    var fields_geo = ["sawahteri", "luas", "sawahhu", "pemukiman"];
-
-    // Parsing JSON
-    var data_geo = JSON.parse('{{info_geo|tojson}}');
-    console.log(data_geo);
-
-    // Memisahkan data_geo berdasarkan tahun
-    var dataByYear_geo = data_geo.reduce(function(acc, item) {
-        if (!acc[item.tahun]) {
-            acc[item.tahun] = {};
-        }
-        $.each(fields_geo, function(index, field) {
-            if (!acc[item.tahun][field]) {
-                acc[item.tahun][field] = [];
-            }
-            acc[item.tahun][field].push(item[field]);
-        });
-        return acc;
-    }, {});
-
-    // Mengambil kategori dari fields_geo
-    var categories_geo = fields_geo;
-
-    // Menyiapkan data untuk grafik
-    var seriesData_geo = [];
-    var colors_geo = []
-    $.each(Object.keys(dataByYear_geo), function(index, year) {
-        let color = generateRandomColors(1, 100)[0]; // Ambil satu warna dengan jarak minimum 100
-        seriesData_geo.push({
-            name: year,
-            data: $.map(fields_geo, function(field) {
-                return dataByYear_geo[year][field] ? dataByYear_geo[year][field][0] : 0; // Ambil nilai pertama dari array data
-            }),
-            color: color // Assign the generated color to this series
-        });
-        colors_geo.push(color)
+    // --- LOGIKA FILTER MONOGRAFI ---
+    var dataByYear_mono = {};
+    data_mono.forEach(item => {
+        dataByYear_mono[item.tahun] = item;
     });
 
-    // Membuat opsi grafik
+    function updateChartMono() {
+        var selectedYears = $("#yearDropdownmono").val() || [];
+        var selectedCategories = $("#categoryDropdownmono").val() || [];
+        var newSeries = selectedYears.map(year => {
+            return {
+                name: year,
+                data: selectedCategories.map(catKey => dataByYear_mono[year][catKey] || 0)
+            };
+        });
+
+        chart_mono.updateOptions({
+            series: newSeries,
+            // --- INI BAGIAN UNTUK MENGHILANGKAN ANGKA ---
+            dataLabels: {
+                enabled: false
+            },
+            xaxis: { 
+                categories: selectedCategories.length > 0 
+                    ? selectedCategories.map(key => mapping_mono[key]) 
+                    : Object.values(mapping_mono) 
+            }
+        });
+    }
+
+    $("#yearDropdownmono, #categoryDropdownmono").on('change', updateChartMono);
+
+    // --- FITUR ADMIN MONOGRAFI ---
+    function fillFormMono() {
+        var val = $('#tahun').val();
+        var row = data_mono.find(item => item.tahun == val);
+        if (row) {
+            Object.keys(mapping_mono).forEach(key => {
+                $(`[name=${key}]`).val(row[key]);
+            });
+        }
+    }
+
+    $('#tahun').on('change', fillFormMono);
+
+    $('#kirim').on('click', function () {
+        let formData = new FormData();
+        Object.keys(mapping_mono).forEach(key => formData.append(key, $(`[name=${key}]`).val()));
+        formData.append('selected_tahun', $('#tahun').val());
+        
+        var mode = $(`[name='submit']`).val(); 
+        $.ajax({
+            url: mode === "edit" ? "/admin/edit_mono" : "/admin/tambah_mono",
+            method: mode === "edit" ? 'PUT' : 'POST',
+            data: formData,
+            processData: false, contentType: false,
+            headers: { 'Authorization': 'Bearer ' + "{{ session['jwt_token'] }}" }
+        }).done(res => handleResponse(res, mode, "/admin/monografi"));
+    });
+});
+
+// Fungsi Hapus Global
+function hapusMono() {
+    if (confirm("Hapus data monografi?")) {
+        $.ajax({
+            url: '/admin/hapus_mono',
+            method: 'DELETE',
+            data: { id: $('[name=id]').val() },
+            headers: { 'Authorization': 'Bearer ' + "{{ session['jwt_token'] }}" }
+        }).done(res => handleResponse(res, "hapus", "/admin/monografi"));
+    }
+}
+</script>
+<script>
+$(document).ready(function() {
+    // --- KONFIGURASI DATA GEOGRAFI ---
+    var data_geo = JSON.parse('{{info_geo|tojson}}');
+
+    const mapping_geo = {
+        "sawahteri": "Sawah Teririgasi",
+        "luas": "Luas Wilayah",
+        "sawahhu": "Sawah Tadah Hujan",
+        "pemukiman": "Luas Pemukiman"
+    };
+
+    var tahun_geo = data_geo.map(item => item.tahun);
+    var seriesData_geo = Object.keys(mapping_geo).map(key => {
+        return {
+            name: mapping_geo[key],
+            data: data_geo.map(item => item[key])
+        };
+    });
+
+    // --- INISIALISASI GRAFIK GEOGRAFI ---
     var options_geo = {
         series: seriesData_geo,
-        chart: {
-            type: "bar",
-            height: 260,
-            toolbar: {
-                show: false,
-            },
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: "42%",
-                endingShape: "rounded",
-                borderRadius: 5,
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        xaxis: {
-            categories: categories_geo,
-        },
-        yaxis: {
-            show: true,
-        },
-        stroke: {
-            show: true,
-            width: 5,
-            colors: ["transparent"],
-        },
-        tooltip: {
-            theme: "dark",
-        },
+        chart: { type: "bar", height: 260, toolbar: { show: false } },
+        plotOptions: { bar: { horizontal: false, columnWidth: "42%", borderRadius: 5 } },
+        xaxis: { categories: tahun_geo },
+        colors: ['#00E396', '#FEB019', '#FF4560', '#775DD0'], // Warna pembeda
+        tooltip: { theme: "dark" }
     };
 
     var chart_geo = new ApexCharts($("#chart_geo")[0], options_geo);
     chart_geo.render();
 
-    function getSelectedValues(selectElement) {
-        var selected = [];
-        $(selectElement).find('option:selected').each(function() {
-            selected.push($(this).val());
-        });
-        return selected;
-    }
+    // --- LOGIKA FILTER GEOGRAFI ---
+    var dataByYear_geo = {};
+    data_geo.forEach(item => {
+        dataByYear_geo[item.tahun] = item;
+    });
 
-    function updateChart(init) {
-        var year_id = "#yearDropdown" + init;
-        console.log(year_id);
-        var categori_id = "#categoryDropdown" + init;
-        console.log(categori_id);
-        var yearDropdown = $(year_id);
-        var categoryDropdown = $(categori_id);
-        var selectedYears = getSelectedValues(yearDropdown);
-        console.log(selectedYears);
-        var selectedCategories = getSelectedValues(categoryDropdown);
-        console.log(selectedCategories);
-
-        var newSeriesData = [];
-        var newSeriesData = [];
-    if (init == "mono") {
-        $.each(selectedYears, function(index, year) {
-            var seriesData = [];
-            $.each(selectedCategories, function(index, category) {
-                if (dataByYear_mono[year] && dataByYear_mono[year][category]) {
-                    seriesData.push(dataByYear_mono[year][category][0]); // Mengambil data untuk kategori dan tahun
-                } else {
-                    seriesData.push(0);
-                }
-            });
-            newSeriesData.push({
-                name: year,
-                data: seriesData
-            });
-        });
+    function updateChartGeo() {
+        var selectedYears = $("#yearDropdowngeo").val() || [];
+        var selectedCategories = $("#categoryDropdowngeo").val() || [];
         
-        chart_mono.updateOptions({
-            series: newSeriesData,
-            xaxis: {
-                categories: selectedCategories.length > 0 ? selectedCategories : categories_mono
-            }
-        });
-    } else if (init == "geo") {
-        $.each(selectedYears, function(index, year) {
-            var seriesData = [];
-            $.each(selectedCategories, function(index, category) {
-                if (dataByYear_geo[year] && dataByYear_geo[year][category]) {
-                    seriesData.push(dataByYear_geo[year][category][0]); // Mengambil data untuk kategori dan tahun
-                } else {
-                    seriesData.push(0);
-                }
-            });
-            newSeriesData.push({
+        var newSeries = selectedYears.map(year => {
+            return {
                 name: year,
-                data: seriesData
-            });
+                data: selectedCategories.map(catKey => dataByYear_geo[year][catKey] || 0)
+            };
         });
 
         chart_geo.updateOptions({
-            series: newSeriesData,
-            xaxis: {
-                categories: selectedCategories.length > 0 ? selectedCategories : categories_geo
+            series: newSeries,
+            xaxis: { 
+                categories: selectedCategories.length > 0 
+                    ? selectedCategories.map(key => mapping_geo[key]) 
+                    : Object.values(mapping_geo) 
             }
         });
     }
-    }
 
-    $("#yearDropdownmono").on('change', function() { updateChart("mono"); });
-    $("#categoryDropdownmono").on('change', function() { updateChart("mono"); });
-    $("#yearDropdowngeo").on('change', function() { updateChart("geo"); });
-    $("#categoryDropdowngeo").on('change', function() { updateChart("geo"); });
+    $("#yearDropdowngeo, #categoryDropdowngeo").on('change', updateChartGeo);
+
+    // --- FITUR ADMIN GEOGRAFI ---
+    $('#tahun_geo_select').on('change', function() {
+        var val = $(this).val();
+        var row = data_geo.find(item => item.tahun == val);
+        if (row) {
+            Object.keys(mapping_geo).forEach(key => {
+                $(`[name=${key}_geo]`).val(row[key]);
+            });
+        }
+    });
 });
 
-    </script>
+// Fungsi Hapus Global Geografi
+function hapusGeo() {
+    if (confirm("Hapus data geografi?")) {
+        $.ajax({
+            url: '/admin/hapus_geo',
+            method: 'DELETE',
+            data: { id: $('[name=id_geo]').val() },
+            headers: { 'Authorization': 'Bearer ' + "{{ session['jwt_token'] }}" }
+        }).done(res => handleResponse(res, "hapus", "/admin/geografi"));
+    }
+}
+</script>
 {% endblock %}
