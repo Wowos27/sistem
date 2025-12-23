@@ -128,119 +128,135 @@
     {% block js %}
 <script>
 $(document).ready(function() {
-    // --- KONFIGURASI DATA MONOGRAFI ---
+    // --- 1. DATA & MAPPING MONOGRAFI ---
     var data_mono = JSON.parse('{{info_mono|tojson}}');
     
+    // Mapping: jkk (Jumlah KK) diletakkan di sebelah jpenduduk
     const mapping_mono = {
-        "jpenduduk": "Jumlah Penduduk", "laki": "laki-laki", "perempuan": "Perempuan",
-        "jkkprese": "Jumlah KK Presejahtera", "jkkseja": "Jumlah KK Sejahtera", "jkkkaya": "Jumlah KK Kaya",
-        "jkksedang": "Jumlah KK Sedang", "jkkmiskin": "Jumlah KK Miskin", "buruh": "Buruh",
-        "petani": "Petani", "peternak": "Peternak", "pedagang": "Pedagang",
-        "tukangkayu": "Tukang Kayu", "tukangbatu": "Tukang Batu", "penjahit": "Penjahit",
-        "asn": "ASN", "pensiunan": "Pensiunan", "perangkatdesa": "Perangkat Desa",
-        "jasa_wiraswasta": "Jasa Wiraswasta", "pengrajinbatik": "Pengrajin Batik", "dll": "DLL",
-        "islam": "Islam", "kristen": "Kristen", "protestan": "Protestan",
-        "katolik": "Katolik", "hindu": "Hindu", "budha": "Budha"
+        "jpenduduk": "Jumlah Penduduk", 
+        "jkk": "Jumlah KK", 
+        "laki": "laki-laki", 
+        "perempuan": "Perempuan",
+        "jkkprese": "Jumlah KK Presejahtera", 
+        "jkkseja": "Jumlah KK Sejahtera", 
+        "jkkkaya": "Jumlah KK Kaya", 
+        "jkksedang": "Jumlah KK Sedang", 
+        "jkkmiskin": "Jumlah KK Miskin", 
+        "buruh": "Buruh", 
+        "petani": "Petani", 
+        "peternak": "Peternak", 
+        "pedagang": "Pedagang",
+        "tukangkayu": "Tukang Kayu", 
+        "tukangbatu": "Tukang Batu", 
+        "penjahit": "Penjahit",
+        "asn": "ASN", 
+        "pensiunan": "Pensiunan", 
+        "perangkatdesa": "Perangkat Desa",
+        "jasa_wiraswasta": "Jasa Wiraswasta", 
+        "pengrajinbatik": "Pengrajin Batik", 
+        "dll": "DLL",
+        "islam": "Islam", 
+        "kristen": "Kristen", 
+        "protestan": "Protestan",
+        "katolik": "Katolik", 
+        "hindu": "Hindu", 
+        "budha": "Budha"
     };
 
     var tahun_mono = data_mono.map(item => item.tahun);
-    var seriesData_mono = Object.keys(mapping_mono).map(key => {
-        return {
-            name: mapping_mono[key],
-            data: data_mono.map(item => item[key])
-        };
-    });
+    var series_awal = Object.keys(mapping_mono).map(key => ({
+        name: mapping_mono[key],
+        data: data_mono.map(item => item[key] || 0)
+    }));
 
-    // --- INISIALISASI GRAFIK MONOGRAFI ---
+    // --- 2. INISIALISASI GRAFIK MONOGRAFI ---
     var options_mono = {
-        series: seriesData_mono,
-        chart: { type: "bar", height: 260, toolbar: { show: false } },
-        plotOptions: { bar: { horizontal: false, columnWidth: "42%", borderRadius: 5 } },
-        xaxis: { categories: tahun_mono },
-        tooltip: { theme: "dark" }
+        series: series_awal,
+        chart: { 
+            type: "bar", 
+            height: 350, 
+            toolbar: { show: false } 
+        },
+        // MENGHILANGKAN ANGKA DI ATAS BATANG
+        dataLabels: { 
+            enabled: false 
+        }, 
+        plotOptions: { 
+            bar: { 
+                horizontal: false, 
+                columnWidth: "50%", 
+                borderRadius: 5 
+            } 
+        },
+        xaxis: { 
+            categories: tahun_mono 
+        },
+        yaxis: { 
+            forceNiceScale: true 
+        },
+        tooltip: { 
+            theme: "dark" 
+        }
     };
 
     var chart_mono = new ApexCharts($("#chart_mono")[0], options_mono);
     chart_mono.render();
 
-    // --- LOGIKA FILTER MONOGRAFI ---
-    var dataByYear_mono = {};
-    data_mono.forEach(item => {
-        dataByYear_mono[item.tahun] = item;
-    });
-
+    // --- 3. FUNGSI FILTER (DROPDOWN) ---
     function updateChartMono() {
         var selectedYears = $("#yearDropdownmono").val() || [];
         var selectedCategories = $("#categoryDropdownmono").val() || [];
+        
         var newSeries = selectedYears.map(year => {
+            var row = data_mono.find(item => item.tahun == year) || {};
             return {
                 name: year,
-                data: selectedCategories.map(catKey => dataByYear_mono[year][catKey] || 0)
+                data: selectedCategories.map(catKey => row[catKey] || 0)
             };
         });
 
         chart_mono.updateOptions({
             series: newSeries,
-            // --- INI BAGIAN UNTUK MENGHILANGKAN ANGKA ---
-            dataLabels: {
-                enabled: false
-            },
+            dataLabels: { enabled: false }, // Tetap false saat update
             xaxis: { 
-                categories: selectedCategories.length > 0 
-                    ? selectedCategories.map(key => mapping_mono[key]) 
-                    : Object.values(mapping_mono) 
+                categories: selectedCategories.map(key => mapping_mono[key] || key) 
             }
         });
     }
 
     $("#yearDropdownmono, #categoryDropdownmono").on('change', updateChartMono);
 
-    // --- FITUR ADMIN MONOGRAFI ---
-    function fillFormMono() {
-        var val = $('#tahun').val();
-        var row = data_mono.find(item => item.tahun == val);
+    // --- 4. LOGIKA ADMIN (FORM & KIRIM DATA) ---
+    $('#tahun').on('change', function() {
+        var row = data_mono.find(item => item.tahun == $(this).val());
         if (row) {
-            Object.keys(mapping_mono).forEach(key => {
-                $(`[name=${key}]`).val(row[key]);
-            });
+            Object.keys(mapping_mono).forEach(key => $(`[name=${key}]`).val(row[key]));
         }
-    }
-
-    $('#tahun').on('change', fillFormMono);
+    });
 
     $('#kirim').on('click', function () {
         let formData = new FormData();
         Object.keys(mapping_mono).forEach(key => formData.append(key, $(`[name=${key}]`).val()));
         formData.append('selected_tahun', $('#tahun').val());
         
-        var mode = $(`[name='submit']`).val(); 
+        var submitMode = $(`[name='submit']`).val(); 
         $.ajax({
-            url: mode === "edit" ? "/admin/edit_mono" : "/admin/tambah_mono",
-            method: mode === "edit" ? 'PUT' : 'POST',
+            url: submitMode === "edit" ? "/admin/edit_mono" : "/admin/tambah_mono",
+            method: submitMode === "edit" ? 'PUT' : 'POST',
             data: formData,
-            processData: false, contentType: false,
+            processData: false, 
+            contentType: false,
             headers: { 'Authorization': 'Bearer ' + "{{ session['jwt_token'] }}" }
-        }).done(res => handleResponse(res, mode, "/admin/monografi"));
+        }).done(res => handleResponse(res, submitMode, "/admin/monografi"));
     });
 });
-
-// Fungsi Hapus Global
-function hapusMono() {
-    if (confirm("Hapus data monografi?")) {
-        $.ajax({
-            url: '/admin/hapus_mono',
-            method: 'DELETE',
-            data: { id: $('[name=id]').val() },
-            headers: { 'Authorization': 'Bearer ' + "{{ session['jwt_token'] }}" }
-        }).done(res => handleResponse(res, "hapus", "/admin/monografi"));
-    }
-}
 </script>
 <script>
 $(document).ready(function() {
-    // --- KONFIGURASI DATA GEOGRAFI ---
+    // --- 1. DATA & MAPPING GEOGRAFI ---
     var data_geo = JSON.parse('{{info_geo|tojson}}');
 
+    // Mapping key database ke label tampilan grafik
     const mapping_geo = {
         "sawahteri": "Sawah Teririgasi",
         "luas": "Luas Wilayah",
@@ -249,77 +265,80 @@ $(document).ready(function() {
     };
 
     var tahun_geo = data_geo.map(item => item.tahun);
-    var seriesData_geo = Object.keys(mapping_geo).map(key => {
-        return {
-            name: mapping_geo[key],
-            data: data_geo.map(item => item[key])
-        };
-    });
+    var series_awal_geo = Object.keys(mapping_geo).map(key => ({
+        name: mapping_geo[key],
+        data: data_geo.map(item => item[key] || 0)
+    }));
 
-    // --- INISIALISASI GRAFIK GEOGRAFI ---
+    // --- 2. INISIALISASI GRAFIK GEOGRAFI ---
     var options_geo = {
-        series: seriesData_geo,
-        chart: { type: "bar", height: 260, toolbar: { show: false } },
-        plotOptions: { bar: { horizontal: false, columnWidth: "42%", borderRadius: 5 } },
-        xaxis: { categories: tahun_geo },
-        colors: ['#00E396', '#FEB019', '#FF4560', '#775DD0'], // Warna pembeda
-        tooltip: { theme: "dark" }
+        series: series_awal_geo,
+        chart: { 
+            type: "bar", 
+            height: 350, 
+            toolbar: { show: false } 
+        },
+        // MENONAKTIFKAN NOMOR DI ATAS BATANG
+        dataLabels: { 
+            enabled: false 
+        }, 
+        plotOptions: { 
+            bar: { 
+                horizontal: false, 
+                columnWidth: "45%", 
+                borderRadius: 5 
+            } 
+        },
+        xaxis: { 
+            categories: tahun_geo 
+        },
+        yaxis: {
+            forceNiceScale: true
+        },
+        colors: ['#00E396', '#FEB019', '#FF4560', '#775DD0'], // Warna pembeda kategori
+        tooltip: { 
+            theme: "dark" 
+        }
     };
 
     var chart_geo = new ApexCharts($("#chart_geo")[0], options_geo);
     chart_geo.render();
 
-    // --- LOGIKA FILTER GEOGRAFI ---
-    var dataByYear_geo = {};
-    data_geo.forEach(item => {
-        dataByYear_geo[item.tahun] = item;
-    });
-
+    // --- 3. FUNGSI FILTER (DROPDOWN) ---
     function updateChartGeo() {
         var selectedYears = $("#yearDropdowngeo").val() || [];
         var selectedCategories = $("#categoryDropdowngeo").val() || [];
         
         var newSeries = selectedYears.map(year => {
+            var row = data_geo.find(item => item.tahun == year) || {};
             return {
                 name: year,
-                data: selectedCategories.map(catKey => dataByYear_geo[year][catKey] || 0)
+                data: selectedCategories.map(catKey => row[catKey] || 0)
             };
         });
 
         chart_geo.updateOptions({
             series: newSeries,
+            dataLabels: { enabled: false }, // Pastikan angka tetap tidak muncul saat update
             xaxis: { 
-                categories: selectedCategories.length > 0 
-                    ? selectedCategories.map(key => mapping_geo[key]) 
-                    : Object.values(mapping_geo) 
+                categories: selectedCategories.map(key => mapping_geo[key] || key) 
             }
         });
     }
 
     $("#yearDropdowngeo, #categoryDropdowngeo").on('change', updateChartGeo);
 
-    // --- FITUR ADMIN GEOGRAFI ---
+    // --- 4. LOGIKA ADMIN (ISI FORM OTOMATIS) ---
+    // Gunakan ID select yang sesuai untuk tahun geografi, misal: #tahun_geo_select
     $('#tahun_geo_select').on('change', function() {
-        var val = $(this).val();
-        var row = data_geo.find(item => item.tahun == val);
+        var row = data_geo.find(item => item.tahun == $(this).val());
         if (row) {
             Object.keys(mapping_geo).forEach(key => {
-                $(`[name=${key}_geo]`).val(row[key]);
+                // Mengisi input dengan name yang sesuai (misal: sawahteri, luas, dll)
+                $(`[name=${key}]`).val(row[key]);
             });
         }
     });
 });
-
-// Fungsi Hapus Global Geografi
-function hapusGeo() {
-    if (confirm("Hapus data geografi?")) {
-        $.ajax({
-            url: '/admin/hapus_geo',
-            method: 'DELETE',
-            data: { id: $('[name=id_geo]').val() },
-            headers: { 'Authorization': 'Bearer ' + "{{ session['jwt_token'] }}" }
-        }).done(res => handleResponse(res, "hapus", "/admin/geografi"));
-    }
-}
 </script>
 {% endblock %}
